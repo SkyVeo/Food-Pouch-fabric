@@ -7,4 +7,7 @@
 - Compatible with all food, vanilla and modded.
 
 ## Download
-You can download the mod on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/food-pouch).
+The mod can be downloaded on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/food-pouch).
+
+## Mod Loaders
+The mod also exists on [NeoForge](https://github.com/SkyVeo/Food-Pouch-neoforge).
