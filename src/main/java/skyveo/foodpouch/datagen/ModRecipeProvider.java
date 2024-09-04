@@ -20,14 +20,13 @@ public class ModRecipeProvider extends FabricRecipeProvider {
     @Override
     public void generate(RecipeExporter exporter) {
         ShapedRecipeJsonBuilder.create(RecipeCategory.FOOD, ModItems.FOOD_POUCH)
-                .input('#', Items.LEATHER)
                 .input('S', Items.STRING)
-                .input('F', ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
-                .pattern(" S ")
-                .pattern("#F#")
-                .pattern(" # ")
-                .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
+                .input('L', Items.LEATHER)
+                .input('#', ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
+                .pattern("S ")
+                .pattern("L#")
                 .criterion(hasItem(Items.STRING), conditionsFromItem(Items.STRING))
+                .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
                 .offerTo(exporter);
     }
 }

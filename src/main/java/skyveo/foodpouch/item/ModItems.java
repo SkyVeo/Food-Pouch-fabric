@@ -1,8 +1,6 @@
 package skyveo.foodpouch.item;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
@@ -14,7 +12,7 @@ import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 
 public class ModItems {
-    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(new Item.Settings().maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT)), ItemGroups.FOOD_AND_DRINK);
+    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.FOOD_AND_DRINK);
 
     public static <T extends Item> T register(String name, T item) {
         return register(name, item, null);

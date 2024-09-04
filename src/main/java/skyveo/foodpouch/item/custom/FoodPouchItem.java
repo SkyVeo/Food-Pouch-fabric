@@ -6,6 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.BundleItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.ClickType;
@@ -15,8 +16,8 @@ import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 
 public class FoodPouchItem extends BundleItem {
-    public FoodPouchItem(Settings settings) {
-        super(settings);
+    public FoodPouchItem() {
+        super(new Item.Settings().maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
     }
 
     public static boolean isFood(ItemStack stack) {
