@@ -16,11 +16,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
-import skyveo.foodpouch.util.ICustomBundleContentBuilder;
+import skyveo.foodpouch.util.FoodPouchContentsComponentBuilder;
 
 import java.util.List;
 
 public class FoodPouchItem extends BundleItem {
+    public static final int DEFAULT_TIER = 1;
     public static final int BASE_SIZE = 64;
 
     public final int maxSize;
@@ -35,7 +36,7 @@ public class FoodPouchItem extends BundleItem {
     }
 
     public FoodPouchItem() {
-        this(1);
+        this(DEFAULT_TIER);
     }
 
     public static int getMaxSizeByTier(int tier) {
@@ -61,16 +62,9 @@ public class FoodPouchItem extends BundleItem {
     }
 
     @Nullable
-    protected BundleContentsComponent.Builder getBuilder(ItemStack stack) {
+    protected FoodPouchContentsComponentBuilder getBuilder(ItemStack stack) {
         BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
-        if (bundleContentsComponent == null) {
-            return null;
-        }
-
-        BundleContentsComponent.Builder builder = new BundleContentsComponent.Builder(bundleContentsComponent);
-        ((ICustomBundleContentBuilder) builder).setMaxSize(this.maxSize);
-
-        return builder;
+        return bundleContentsComponent != null ? new FoodPouchContentsComponentBuilder(bundleContentsComponent, this.maxSize) : null;
     }
 
     protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
