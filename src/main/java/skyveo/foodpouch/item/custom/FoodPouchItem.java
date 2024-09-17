@@ -23,9 +23,13 @@ public class FoodPouchItem extends BundleItem {
 
     public final int maxSize;
 
-    public FoodPouchItem(int tier) {
-        super(new Item.Settings().maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
+    public FoodPouchItem(int tier, Item.Settings settings) {
+        super(settings.maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
         this.maxSize = getMaxSizeByTier(tier);
+    }
+
+    public FoodPouchItem(int tier) {
+        this(tier, new Item.Settings());
     }
 
     public FoodPouchItem() {
