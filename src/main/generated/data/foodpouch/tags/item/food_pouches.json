@@ -1,0 +1,9 @@
+{
+  "values": [
+    "foodpouch:food_pouch",
+    "foodpouch:iron_food_pouch",
+    "foodpouch:gold_food_pouch",
+    "foodpouch:diamond_food_pouch",
+    "foodpouch:netherite_food_pouch"
+  ]
+}

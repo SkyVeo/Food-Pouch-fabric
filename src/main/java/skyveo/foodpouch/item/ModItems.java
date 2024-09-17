@@ -12,7 +12,7 @@ import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 
 public class ModItems {
-    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.FOOD_AND_DRINK);
+    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.TOOLS);
     public static final Item IRON_FOOD_POUCH = register("iron_food_pouch", new FoodPouchItem(2));
     public static final Item GOLD_FOOD_POUCH = register("gold_food_pouch", new FoodPouchItem(3));
     public static final Item DIAMOND_FOOD_POUCH = register("diamond_food_pouch", new FoodPouchItem(4));

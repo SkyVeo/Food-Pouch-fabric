@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:iron_ingot"
+  },
+  "base": {
+    "tag": "foodpouch:food_pouches"
+  },
+  "result": {
+    "count": 1,
+    "id": "foodpouch:iron_food_pouch"
+  },
+  "template": {
+    "item": "minecraft:leather"
+  }
+}

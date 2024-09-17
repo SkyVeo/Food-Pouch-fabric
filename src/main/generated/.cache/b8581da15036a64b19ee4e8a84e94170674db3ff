@@ -1,3 +1,11 @@
-// 1.21.1	2024-09-17T13:39:31.1752974	Food Pouch/Recipes
-a52d1059ec3ba76f88d1337f8d4879d96b792610 data\foodpouch\advancement\recipes\food\food_pouch.json
-b63a62350fa96574a3f44ec00ff24bdac2adae83 data\foodpouch\recipe\food_pouch.json
+// 1.21.1	2024-09-17T17:27:24.2662776	Food Pouch/Recipes
+fdaced5c0ec7108031b806870cb30a3f8a88118f data\foodpouch\recipe\diamond_food_pouch.json
+23762bbe313d373b9f894722bcbeec8d4f489615 data\foodpouch\recipe\gold_food_pouch.json
+e368bdf205fdb5295110c94d3a32431e8524a316 data\foodpouch\advancement\recipes\tools\gold_food_pouch.json
+30f8527b6c32937d8e1c30b245c2c6aaa21defd2 data\foodpouch\recipe\netherite_food_pouch.json
+036a796f92d112b6ce66ae18be969767fb53ed75 data\foodpouch\advancement\recipes\tools\iron_food_pouch.json
+203ea134ad340926b5c108b1f3257c4e7ebb70e2 data\foodpouch\recipe\food_pouch.json
+a52d1059ec3ba76f88d1337f8d4879d96b792610 data\foodpouch\advancement\recipes\tools\food_pouch.json
+2e5b058121985429fe23f6d2392b3710e1023b6f data\foodpouch\advancement\recipes\tools\diamond_food_pouch.json
+40bb3919d0c2d42bb3c08690172da256a82bb3d5 data\foodpouch\advancement\recipes\tools\netherite_food_pouch.json
+82728e024887dbab7c7b681fa218a27cfad743c3 data\foodpouch\recipe\iron_food_pouch.json

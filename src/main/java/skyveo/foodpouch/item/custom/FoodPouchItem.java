@@ -8,15 +8,17 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
+import net.minecraft.text.Text;
+import net.minecraft.util.*;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
 import skyveo.foodpouch.util.ICustomBundleContentBuilder;
+
+import java.util.List;
 
 public class FoodPouchItem extends BundleItem {
     public static final int BASE_SIZE = 64;
@@ -163,5 +165,15 @@ public class FoodPouchItem extends BundleItem {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         return this.consumeFirstFood(stack, world, user);
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+        BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
+        if (bundleContentsComponent != null) {
+            int i = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), 64);
+            tooltip.add(Text.translatable("item.minecraft.bundle.fullness", i, this.maxSize).formatted(Formatting.GRAY));
+        }
+
     }
 }
