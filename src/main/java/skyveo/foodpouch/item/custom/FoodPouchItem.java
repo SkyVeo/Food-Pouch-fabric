@@ -14,10 +14,26 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+import skyveo.foodpouch.mixin.BundleItemInvoker;
+import skyveo.foodpouch.util.ICustomBundleContentBuilder;
 
 public class FoodPouchItem extends BundleItem {
-    public FoodPouchItem() {
+    public static final int BASE_SIZE = 64;
+
+    public final int maxSize;
+
+    public FoodPouchItem(int tier) {
         super(new Item.Settings().maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
+        this.maxSize = getMaxSizeByTier(tier);
+    }
+
+    public FoodPouchItem() {
+        this(1);
+    }
+
+    public static int getMaxSizeByTier(int tier) {
+        return tier > 0 ? tier * BASE_SIZE : BASE_SIZE;
     }
 
     public static boolean isFood(ItemStack stack) {
@@ -29,68 +45,71 @@ public class FoodPouchItem extends BundleItem {
         return bundleContentsComponent == null || bundleContentsComponent.isEmpty() ? ItemStack.EMPTY : bundleContentsComponent.get(0);
     }
 
-    public boolean isEmpty(ItemStack foodPouch) {
-        return this.getFirstFood(foodPouch).isEmpty();
-    }
-
     protected void onContentUpdate(ItemStack foodPouch) {
-        if (!this.isEmpty(foodPouch)) {
-            foodPouch.set(DataComponentTypes.FOOD, getFirstFood(foodPouch).get(DataComponentTypes.FOOD));
-        } else {
+        ItemStack stack = getFirstFood(foodPouch);
+        if (stack.isEmpty()) {
             foodPouch.remove(DataComponentTypes.FOOD);
+        } else {
+            foodPouch.set(DataComponentTypes.FOOD, stack.get(DataComponentTypes.FOOD));
         }
     }
 
-    protected ItemStack consumeFirstFood(ItemStack stack, World world, LivingEntity user) {
+    @Nullable
+    protected BundleContentsComponent.Builder getBuilder(ItemStack stack) {
         BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
         if (bundleContentsComponent == null) {
-            return stack;
+            return null;
         }
 
         BundleContentsComponent.Builder builder = new BundleContentsComponent.Builder(bundleContentsComponent);
-        ItemStack food = builder.removeFirst();
-        if (food == null) {
-            return stack;
+        ((ICustomBundleContentBuilder) builder).setMaxSize(this.maxSize);
+
+        return builder;
+    }
+
+    protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
+        if (clickType != ClickType.RIGHT || (!food.isEmpty() && !isFood(food)) || (cursorStackReference != null && !slot.canTakePartial(player))) {
+            return false;
         }
 
-        ItemStack leftovers = food.getItem().finishUsing(food, world, user);
-        if (isFood(leftovers)) {
-            builder.add(leftovers);
-        } else if (user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
-            if (!playerEntity.getInventory().insertStack(leftovers)) {
-                playerEntity.dropItem(leftovers, false);
+        BundleContentsComponent.Builder builder = this.getBuilder(foodPouch);
+        if (builder == null) {
+            return false;
+        }
+
+        BundleItemInvoker invoker = (BundleItemInvoker) this;
+        if (food.isEmpty()) {
+            ItemStack itemStack = builder.removeFirst();
+            if (itemStack != null) {
+                invoker.invokePlayRemoveOneSound(player);
+                if (cursorStackReference != null) {
+                    cursorStackReference.set(itemStack);
+                } else {
+                    ItemStack leftovers = slot.insertStack(itemStack);
+                    builder.add(leftovers);
+                }
+            }
+        } else if (food.getItem().canBeNested()) {
+            int i = builder.add(food);
+            if (i > 0) {
+                invoker.invokePlayInsertSound(player);
             }
         }
 
-        stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-        this.onContentUpdate(stack);
+        foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+        this.onContentUpdate(foodPouch);
 
-        return stack;
+        return true;
     }
 
     @Override
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
-        ItemStack itemStack = slot.getStack();
-        if (!itemStack.isEmpty() && !isFood(itemStack)) {
-            return false;
-        }
-        boolean result = super.onStackClicked(stack, slot, clickType, player);
-        if (result) {
-            this.onContentUpdate(stack);
-        }
-        return result;
+        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
     }
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        if (!otherStack.isEmpty() && !isFood(otherStack)) {
-            return false;
-        }
-        boolean result = super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
-        if (result) {
-            this.onContentUpdate(stack);
-        }
-        return result;
+        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
 
     @Override
@@ -109,6 +128,32 @@ public class FoodPouchItem extends BundleItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack foodPouch = user.getStackInHand(hand);
         return this.getFirstFood(foodPouch).getItem().use(world, user, hand);
+    }
+
+    protected ItemStack consumeFirstFood(ItemStack stack, World world, LivingEntity user) {
+        BundleContentsComponent.Builder builder = this.getBuilder(stack);
+        if (builder == null) {
+            return stack;
+        }
+
+        ItemStack food = builder.removeFirst();
+        if (food == null) {
+            return stack;
+        }
+
+        ItemStack leftovers = food.getItem().finishUsing(food, world, user);
+        if (isFood(leftovers)) {
+            builder.add(leftovers);
+        } else if (user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
+            if (!playerEntity.getInventory().insertStack(leftovers)) {
+                playerEntity.dropItem(leftovers, false);
+            }
+        }
+
+        stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+        this.onContentUpdate(stack);
+
+        return stack;
     }
 
     @Override

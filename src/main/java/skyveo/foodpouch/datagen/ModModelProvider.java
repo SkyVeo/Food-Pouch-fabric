@@ -19,5 +19,9 @@ public class ModModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ModItems.FOOD_POUCH, Models.GENERATED);
+        itemModelGenerator.register(ModItems.IRON_FOOD_POUCH, Models.GENERATED);
+        itemModelGenerator.register(ModItems.GOLD_FOOD_POUCH, Models.GENERATED);
+        itemModelGenerator.register(ModItems.DIAMOND_FOOD_POUCH, Models.GENERATED);
+        itemModelGenerator.register(ModItems.NETHERITE_FOOD_POUCH, Models.GENERATED);
     }
 }

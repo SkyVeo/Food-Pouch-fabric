@@ -3,6 +3,9 @@
 	"package": "skyveo.foodpouch.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"BundleContentsComponentInvoker",
+		"BundleContentsComponentBuilderMixin",
+		"BundleItemInvoker",
 		"LivingEntityMixin"
 	],
 	"injectors": {
