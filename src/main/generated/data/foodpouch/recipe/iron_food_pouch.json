@@ -4,7 +4,7 @@
     "item": "minecraft:iron_ingot"
   },
   "base": {
-    "tag": "foodpouch:food_pouches"
+    "item": "foodpouch:food_pouch"
   },
   "result": {
     "count": 1,

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "foodpouch:item/gold_food_pouch"
+    "layer0": "foodpouch:item/golden_food_pouch"
   }
 }

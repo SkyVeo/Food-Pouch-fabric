@@ -4,11 +4,11 @@
     "item": "minecraft:gold_ingot"
   },
   "base": {
-    "tag": "foodpouch:food_pouches"
+    "item": "foodpouch:iron_food_pouch"
   },
   "result": {
     "count": 1,
-    "id": "foodpouch:gold_food_pouch"
+    "id": "foodpouch:golden_food_pouch"
   },
   "template": {
     "item": "minecraft:leather"

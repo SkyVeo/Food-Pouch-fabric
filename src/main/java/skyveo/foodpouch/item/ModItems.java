@@ -14,7 +14,7 @@ import skyveo.foodpouch.item.custom.FoodPouchItem;
 public class ModItems {
     public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.TOOLS);
     public static final Item IRON_FOOD_POUCH = register("iron_food_pouch", new FoodPouchItem(2), ItemGroups.TOOLS);
-    public static final Item GOLD_FOOD_POUCH = register("gold_food_pouch", new FoodPouchItem(3), ItemGroups.TOOLS);
+    public static final Item GOLD_FOOD_POUCH = register("golden_food_pouch", new FoodPouchItem(3), ItemGroups.TOOLS);
     public static final Item DIAMOND_FOOD_POUCH = register("diamond_food_pouch", new FoodPouchItem(4), ItemGroups.TOOLS);
     public static final Item NETHERITE_FOOD_POUCH = register("netherite_food_pouch", new FoodPouchItem(5, new Item.Settings().fireproof()), ItemGroups.TOOLS);
 

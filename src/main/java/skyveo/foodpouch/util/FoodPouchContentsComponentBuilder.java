@@ -9,8 +9,6 @@ import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
 public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.Builder {
-    public static final int STACK_SIZE = 64;
-
     public final int maxSize;
 
     public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int maxSize) {
@@ -19,8 +17,8 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
     }
 
     public int getMaxAllowed(ItemStack stack) {
-        Fraction itemValue = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(STACK_SIZE));
-        Fraction usedSpace = this.getOccupancy().multiplyBy(Fraction.getFraction(STACK_SIZE));
+        Fraction itemValue = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(64));
+        Fraction usedSpace = this.getOccupancy().multiplyBy(Fraction.getFraction(64));
         Fraction freeSpace = Fraction.getFraction(this.maxSize).subtract(usedSpace);
 
         return Math.max(freeSpace.divideBy(itemValue).intValue(), 0);
@@ -39,9 +37,10 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
                 if (j != -1) {
                     ItemStack itemStack = accessor.getStacks().remove(j);
                     int newCount = itemStack.getCount() + i;
-                    if (newCount > STACK_SIZE) {
-                        ItemStack fullStack = itemStack.copyWithCount(STACK_SIZE);
-                        ItemStack remainingStack = itemStack.copyWithCount(newCount - STACK_SIZE);
+                    int stackSize = itemStack.getMaxCount();
+                    if (newCount > stackSize) {
+                        ItemStack fullStack = itemStack.copyWithCount(stackSize);
+                        ItemStack remainingStack = itemStack.copyWithCount(newCount - stackSize);
                         accessor.getStacks().add(0, fullStack);
                         accessor.getStacks().add(0, remainingStack);
                     } else {

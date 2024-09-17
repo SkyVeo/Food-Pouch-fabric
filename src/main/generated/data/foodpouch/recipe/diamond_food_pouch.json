@@ -4,7 +4,7 @@
     "item": "minecraft:diamond"
   },
   "base": {
-    "tag": "foodpouch:food_pouches"
+    "item": "foodpouch:golden_food_pouch"
   },
   "result": {
     "count": 1,

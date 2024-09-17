@@ -16,13 +16,6 @@ public class ModItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
-        getOrCreateTagBuilder(ModItemTags.FOOD_POUCHES)
-                .add(ModItems.FOOD_POUCH)
-                .add(ModItems.IRON_FOOD_POUCH)
-                .add(ModItems.GOLD_FOOD_POUCH)
-                .add(ModItems.DIAMOND_FOOD_POUCH)
-                .add(ModItems.NETHERITE_FOOD_POUCH);
-
         getOrCreateTagBuilder(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
                 .add(Items.APPLE)
                 .add(Items.GOLDEN_APPLE)

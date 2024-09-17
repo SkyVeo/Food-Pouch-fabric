@@ -10,7 +10,6 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.RegistryWrapper;
-import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.ModItemTags;
 import skyveo.foodpouch.item.ModItems;
 
@@ -21,10 +20,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
         super(output, registriesFuture);
     }
 
-    protected static void offerFoodPouchUpgradeRecipe(RecipeExporter exporter, Item input, Item result) {
+    protected static void offerFoodPouchUpgradeRecipe(RecipeExporter exporter, Item input, Item foodPouch, Item result) {
         SmithingTransformRecipeJsonBuilder.create(
                 Ingredient.ofItems(Items.LEATHER),
-                Ingredient.fromTag(ModItemTags.FOOD_POUCHES),
+                Ingredient.ofItems(foodPouch),
                 Ingredient.ofItems(input),
                 RecipeCategory.TOOLS,
                 result
@@ -45,9 +44,9 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
                 .offerTo(exporter);
 
-        offerFoodPouchUpgradeRecipe(exporter, Items.IRON_INGOT, ModItems.IRON_FOOD_POUCH);
-        offerFoodPouchUpgradeRecipe(exporter, Items.GOLD_INGOT, ModItems.GOLD_FOOD_POUCH);
-        offerFoodPouchUpgradeRecipe(exporter, Items.DIAMOND, ModItems.DIAMOND_FOOD_POUCH);
-        offerFoodPouchUpgradeRecipe(exporter, Items.NETHERITE_INGOT, ModItems.NETHERITE_FOOD_POUCH);
+        offerFoodPouchUpgradeRecipe(exporter, Items.IRON_INGOT, ModItems.FOOD_POUCH, ModItems.IRON_FOOD_POUCH);
+        offerFoodPouchUpgradeRecipe(exporter, Items.GOLD_INGOT, ModItems.IRON_FOOD_POUCH, ModItems.GOLD_FOOD_POUCH);
+        offerFoodPouchUpgradeRecipe(exporter, Items.DIAMOND, ModItems.GOLD_FOOD_POUCH, ModItems.DIAMOND_FOOD_POUCH);
+        offerFoodPouchUpgradeRecipe(exporter, Items.NETHERITE_INGOT, ModItems.DIAMOND_FOOD_POUCH, ModItems.NETHERITE_FOOD_POUCH);
     }
 }
