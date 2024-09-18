@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "foodpouch:item/iron_food_pouch"
+    "layer0": "foodpouch:item/food_pouch",
+    "layer1": "foodpouch:item/iron_food_pouch_overlay"
   }
 }

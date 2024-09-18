@@ -41,7 +41,7 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
                     if (newCount > stackSize) {
                         ItemStack fullStack = itemStack.copyWithCount(stackSize);
                         ItemStack remainingStack = itemStack.copyWithCount(newCount - stackSize);
-                        accessor.getStacks().add(0, fullStack);
+                        accessor.getStacks().add(j, fullStack);
                         accessor.getStacks().add(0, remainingStack);
                     } else {
                         ItemStack combinedStack = itemStack.copyWithCount(newCount);

@@ -11,6 +11,6 @@
     "id": "foodpouch:netherite_food_pouch"
   },
   "template": {
-    "item": "minecraft:leather"
+    "item": "minecraft:netherite_upgrade_smithing_template"
   }
 }

@@ -104,12 +104,12 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
-        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
+        return this.insertFood(stack, slot.getStack(), slot, clickType, player, null);
     }
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
+        return this.insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
 
     @Override
@@ -130,7 +130,8 @@ public class FoodPouchItem extends BundleItem {
         return this.getFirstFood(foodPouch).getItem().use(world, user, hand);
     }
 
-    protected ItemStack consumeFirstFood(ItemStack stack, World world, LivingEntity user) {
+    @Override
+    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         BundleContentsComponent.Builder builder = this.getBuilder(stack);
         if (builder == null) {
             return stack;
@@ -154,11 +155,6 @@ public class FoodPouchItem extends BundleItem {
         this.onContentUpdate(stack);
 
         return stack;
-    }
-
-    @Override
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        return this.consumeFirstFood(stack, world, user);
     }
 
     @Override

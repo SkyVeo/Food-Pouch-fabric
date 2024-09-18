@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 import skyveo.foodpouch.item.ModItemTags;
 import skyveo.foodpouch.item.ModItems;
 
@@ -16,6 +17,13 @@ public class ModItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
+        getOrCreateTagBuilder(ItemTags.DYEABLE)
+                .add(ModItems.FOOD_POUCH)
+                .add(ModItems.IRON_FOOD_POUCH)
+                .add(ModItems.GOLD_FOOD_POUCH)
+                .add(ModItems.DIAMOND_FOOD_POUCH)
+                .add(ModItems.NETHERITE_FOOD_POUCH);
+
         getOrCreateTagBuilder(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
                 .add(Items.APPLE)
                 .add(Items.GOLDEN_APPLE)

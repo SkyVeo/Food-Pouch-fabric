@@ -18,6 +18,9 @@
 		"main": [
 			"skyveo.foodpouch.FoodPouch"
 		],
+		"client": [
+			"skyveo.foodpouch.FoodPouchClient"
+		],
 		"fabric-datagen": [
 			"skyveo.foodpouch.FoodPouchDataGenerator"
 		]
