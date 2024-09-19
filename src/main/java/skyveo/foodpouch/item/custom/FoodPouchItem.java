@@ -14,6 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
 import skyveo.foodpouch.util.FoodPouchContentsComponentBuilder;
@@ -155,6 +156,13 @@ public class FoodPouchItem extends BundleItem {
         this.onContentUpdate(stack);
 
         return stack;
+    }
+
+    @Override
+    public int getItemBarStep(ItemStack stack) {
+        BundleContentsComponent bundleContentsComponent = stack.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
+        int i = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), 64);
+        return Math.min(1 + MathHelper.multiplyFraction(Fraction.getFraction(i, this.maxSize), 12), 13);
     }
 
     @Override
