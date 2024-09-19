@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.component.type.DyedColorComponent;
 import skyveo.foodpouch.item.ModItems;
+import skyveo.foodpouch.util.ModModelPredicateProvider;
 
 public class FoodPouchClient implements ClientModInitializer {
     @Override
@@ -16,5 +17,7 @@ public class FoodPouchClient implements ClientModInitializer {
                 ModItems.DIAMOND_FOOD_POUCH,
                 ModItems.NETHERITE_FOOD_POUCH
         );
+
+        ModModelPredicateProvider.load();
     }
 }
