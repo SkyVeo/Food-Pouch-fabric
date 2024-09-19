@@ -3,13 +3,13 @@
 	"id": "foodpouch",
 	"version": "${version}",
 	"name": "Food Pouch",
-	"description": "A mod that adds a food pouch to store multiple foods and makes eating easier",
+	"description": "Store and manage multiple types of food in a single pouch, making it easier to carry and access your meals during adventures",
 	"authors": [
 		"SkyVeo"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/SkyVeo/Food-Pouch-fabric"
 	},
 	"license": "MIT License",
 	"icon": "assets/foodpouch/icon.png",

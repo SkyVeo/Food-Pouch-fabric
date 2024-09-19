@@ -1,6 +1,7 @@
 package skyveo.foodpouch.item;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.block.cauldron.CauldronBehavior;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
@@ -10,6 +11,8 @@ import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
+
+import java.util.Map;
 
 public class ModItems {
     public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.TOOLS);
@@ -31,5 +34,11 @@ public class ModItems {
     }
 
     public static void load() {
+        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
+        waterCauldronBehavior.put(FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
+        waterCauldronBehavior.put(IRON_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
+        waterCauldronBehavior.put(GOLD_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
+        waterCauldronBehavior.put(DIAMOND_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
+        waterCauldronBehavior.put(NETHERITE_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
     }
 }
