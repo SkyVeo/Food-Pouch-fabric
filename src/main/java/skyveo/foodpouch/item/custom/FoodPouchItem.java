@@ -44,10 +44,6 @@ public class FoodPouchItem extends BundleItem {
         return tier > 0 ? tier * BASE_SIZE : BASE_SIZE;
     }
 
-    public static boolean isFood(ItemStack stack) {
-        return !(stack.getItem() instanceof FoodPouchItem) && stack.contains(DataComponentTypes.FOOD);
-    }
-
     public ItemStack getFirstFood(ItemStack foodPouch) {
         BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
         return bundleContentsComponent == null || bundleContentsComponent.isEmpty() ? ItemStack.EMPTY : bundleContentsComponent.get(0);
@@ -63,43 +59,45 @@ public class FoodPouchItem extends BundleItem {
     }
 
     @Nullable
-    protected FoodPouchContentsComponentBuilder getBuilder(ItemStack stack) {
-        BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
+    protected FoodPouchContentsComponentBuilder getBuilder(ItemStack foodPouch) {
+        BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
         return bundleContentsComponent != null ? new FoodPouchContentsComponentBuilder(bundleContentsComponent, this.maxSize) : null;
     }
 
     protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
-        if (clickType != ClickType.RIGHT || (!food.isEmpty() && !isFood(food)) || (cursorStackReference != null && !slot.canTakePartial(player))) {
+        if (clickType != ClickType.RIGHT || (cursorStackReference != null && !slot.canTakePartial(player))) {
             return false;
         }
 
-        BundleContentsComponent.Builder builder = this.getBuilder(foodPouch);
+        FoodPouchContentsComponentBuilder builder = this.getBuilder(foodPouch);
         if (builder == null) {
             return false;
         }
 
         BundleItemInvoker invoker = (BundleItemInvoker) this;
         if (food.isEmpty()) {
-            ItemStack itemStack = builder.removeFirst();
-            if (itemStack != null) {
-                invoker.invokePlayRemoveOneSound(player);
-                if (cursorStackReference != null) {
-                    cursorStackReference.set(itemStack);
-                } else {
-                    ItemStack leftovers = slot.insertStack(itemStack);
-                    builder.add(leftovers);
-                }
+            ItemStack removedItem = builder.removeFirst();
+            if (removedItem == null) {
+                return false;
             }
-        } else if (food.getItem().canBeNested()) {
-            int i = builder.add(food);
-            if (i > 0) {
-                invoker.invokePlayInsertSound(player);
+
+            invoker.invokePlayRemoveOneSound(player);
+            if (cursorStackReference != null) {
+                cursorStackReference.set(removedItem);
+            } else {
+                ItemStack leftovers = slot.insertStack(removedItem);
+                builder.add(leftovers);
             }
+        } else {
+            if (builder.add(food) == 0) {
+                return false;
+            }
+            invoker.invokePlayInsertSound(player);
         }
 
         foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
         this.onContentUpdate(foodPouch);
-
+        
         return true;
     }
 
@@ -133,7 +131,7 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        BundleContentsComponent.Builder builder = this.getBuilder(stack);
+        FoodPouchContentsComponentBuilder builder = this.getBuilder(stack);
         if (builder == null) {
             return stack;
         }
@@ -144,9 +142,8 @@ public class FoodPouchItem extends BundleItem {
         }
 
         ItemStack leftovers = food.getItem().finishUsing(food, world, user);
-        if (isFood(leftovers)) {
-            builder.add(leftovers);
-        } else if (user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
+        int i = builder.add(leftovers);
+        if (i == 0 && user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
             if (!playerEntity.getInventory().insertStack(leftovers)) {
                 playerEntity.dropItem(leftovers, false);
             }

@@ -1,10 +1,15 @@
 package skyveo.foodpouch.util;
 
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.MilkBucketItem;
+import net.minecraft.item.PotionItem;
 import net.minecraft.screen.slot.Slot;
 import org.apache.commons.lang3.math.Fraction;
+import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
@@ -16,6 +21,11 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
         this.maxSize = maxSize;
     }
 
+    public static boolean canStoreItem(ItemStack stack) {
+        Item item = stack.getItem();
+        return item.canBeNested() && !(item instanceof FoodPouchItem) && (stack.contains(DataComponentTypes.FOOD) || item.getClass() == PotionItem.class || item.getClass() == MilkBucketItem.class);
+    }
+
     public int getMaxAllowed(ItemStack stack) {
         Fraction itemValue = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(64));
         Fraction usedSpace = this.getOccupancy().multiplyBy(Fraction.getFraction(64));
@@ -24,41 +34,41 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
         return Math.max(freeSpace.divideBy(itemValue).intValue(), 0);
     }
 
+    @Override
     public int add(ItemStack stack) {
-        if (!stack.isEmpty() && stack.getItem().canBeNested()) {
-            int i = Math.min(stack.getCount(), this.getMaxAllowed(stack));
-            if (i == 0) {
-                return 0;
-            } else {
-                BundleContentsComponentBuilderAccessor accessor = (BundleContentsComponentBuilderAccessor) this;
-
-                accessor.setOccupancy(this.getOccupancy().add(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(i, 1))));
-                int j = accessor.invokeAddInternal(stack);
-                if (j != -1) {
-                    ItemStack itemStack = accessor.getStacks().remove(j);
-                    int newCount = itemStack.getCount() + i;
-                    int stackSize = itemStack.getMaxCount();
-                    if (newCount > stackSize) {
-                        ItemStack fullStack = itemStack.copyWithCount(stackSize);
-                        ItemStack remainingStack = itemStack.copyWithCount(newCount - stackSize);
-                        accessor.getStacks().add(j, fullStack);
-                        accessor.getStacks().add(0, remainingStack);
-                    } else {
-                        ItemStack combinedStack = itemStack.copyWithCount(newCount);
-                        accessor.getStacks().add(0, combinedStack);
-                    }
-                    stack.decrement(i);
-                } else {
-                    accessor.getStacks().add(0, stack.split(i));
-                }
-
-                return i;
-            }
-        } else {
+        if (!FoodPouchContentsComponentBuilder.canStoreItem(stack)) {
             return 0;
         }
+
+        int toAdd = Math.min(stack.getCount(), this.getMaxAllowed(stack));
+        if (toAdd == 0) {
+            return 0;
+        }
+
+        BundleContentsComponentBuilderAccessor accessor = (BundleContentsComponentBuilderAccessor) this;
+        accessor.setOccupancy(this.getOccupancy().add(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(toAdd, 1))));
+
+        int existingStackIndex = accessor.invokeAddInternal(stack);
+        if (existingStackIndex != -1) {
+            ItemStack existingStack = accessor.getStacks().remove(existingStackIndex);
+            int newCount = existingStack.getCount() + toAdd;
+            int maxStackSize = existingStack.getMaxCount();
+
+            if (newCount > maxStackSize) {
+                accessor.getStacks().add(existingStackIndex, existingStack.copyWithCount(maxStackSize));
+                accessor.getStacks().add(0, existingStack.copyWithCount(newCount - maxStackSize));
+            } else {
+                accessor.getStacks().add(0, existingStack.copyWithCount(newCount));
+            }
+            stack.decrement(toAdd);
+        } else {
+            accessor.getStacks().add(0, stack.split(toAdd));
+        }
+
+        return toAdd;
     }
 
+    @Override
     public int add(Slot slot, PlayerEntity player) {
         ItemStack itemStack = slot.getStack();
         int i = this.getMaxAllowed(itemStack);
