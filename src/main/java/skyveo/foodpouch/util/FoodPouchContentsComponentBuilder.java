@@ -14,7 +14,10 @@ import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
+import java.util.List;
+
 public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.Builder {
+    public static final List<Class<? extends Item>> ADDITIONAL_ALLOWED_ITEMS = List.of(PotionItem.class, MilkBucketItem.class);
     public final int maxSize;
 
     public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int maxSize) {
@@ -25,15 +28,18 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
     @Nullable
     public static FoodPouchContentsComponentBuilder of(ItemStack foodPouch) {
         BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
-        if (bundleContentsComponent != null && foodPouch.getItem() instanceof FoodPouchItem foodPouchItem) {
-            return new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.maxSize);
+        if (bundleContentsComponent == null || !(foodPouch.getItem() instanceof FoodPouchItem foodPouchItem)) {
+            return null;
         }
-        return null;
+        return new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.maxSize);
     }
 
     public static boolean canStoreItem(ItemStack stack) {
         Item item = stack.getItem();
-        return item.canBeNested() && !(item instanceof FoodPouchItem) && (stack.contains(DataComponentTypes.FOOD) || item.getClass() == PotionItem.class || item.getClass() == MilkBucketItem.class);
+        if (!item.canBeNested() || item instanceof FoodPouchItem) {
+            return false;
+        }
+        return stack.contains(DataComponentTypes.FOOD) || ADDITIONAL_ALLOWED_ITEMS.contains(item.getClass());
     }
 
     public int getMaxAllowed(ItemStack stack) {
