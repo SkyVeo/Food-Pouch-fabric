@@ -58,18 +58,12 @@ public class FoodPouchItem extends BundleItem {
         }
     }
 
-    @Nullable
-    protected FoodPouchContentsComponentBuilder getBuilder(ItemStack foodPouch) {
-        BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
-        return bundleContentsComponent != null ? new FoodPouchContentsComponentBuilder(bundleContentsComponent, this.maxSize) : null;
-    }
-
     protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
         if (clickType != ClickType.RIGHT || (cursorStackReference != null && !slot.canTakePartial(player))) {
             return false;
         }
 
-        FoodPouchContentsComponentBuilder builder = this.getBuilder(foodPouch);
+        FoodPouchContentsComponentBuilder builder = FoodPouchContentsComponentBuilder.of(foodPouch);
         if (builder == null) {
             return false;
         }
@@ -131,7 +125,7 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        FoodPouchContentsComponentBuilder builder = this.getBuilder(stack);
+        FoodPouchContentsComponentBuilder builder = FoodPouchContentsComponentBuilder.of(stack);
         if (builder == null) {
             return stack;
         }

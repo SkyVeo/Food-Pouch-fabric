@@ -9,6 +9,7 @@ import net.minecraft.item.MilkBucketItem;
 import net.minecraft.item.PotionItem;
 import net.minecraft.screen.slot.Slot;
 import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
@@ -19,6 +20,15 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
     public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int maxSize) {
         super(base);
         this.maxSize = maxSize;
+    }
+
+    @Nullable
+    public static FoodPouchContentsComponentBuilder of(ItemStack foodPouch) {
+        BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
+        if (bundleContentsComponent != null && foodPouch.getItem() instanceof FoodPouchItem foodPouchItem) {
+            return new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.maxSize);
+        }
+        return null;
     }
 
     public static boolean canStoreItem(ItemStack stack) {
