@@ -24,6 +24,13 @@ public class ModItemTagProvider extends FabricTagProvider.ItemTagProvider {
                 .add(ModItems.DIAMOND_FOOD_POUCH)
                 .add(ModItems.NETHERITE_FOOD_POUCH);
 
+        getOrCreateTagBuilder(ItemTags.WEAPON_ENCHANTABLE)
+                .add(ModItems.FOOD_POUCH)
+                .add(ModItems.IRON_FOOD_POUCH)
+                .add(ModItems.GOLD_FOOD_POUCH)
+                .add(ModItems.DIAMOND_FOOD_POUCH)
+                .add(ModItems.NETHERITE_FOOD_POUCH);
+
         getOrCreateTagBuilder(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
                 .add(Items.APPLE)
                 .add(Items.GOLDEN_APPLE)
