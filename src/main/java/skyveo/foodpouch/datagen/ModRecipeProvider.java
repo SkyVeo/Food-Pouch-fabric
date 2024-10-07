@@ -3,7 +3,7 @@ package skyveo.foodpouch.datagen;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.data.server.recipe.RecipeExporter;
-import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
+import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
 import net.minecraft.data.server.recipe.SmithingTransformRecipeJsonBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -34,12 +34,10 @@ public class ModRecipeProvider extends FabricRecipeProvider {
 
     @Override
     public void generate(RecipeExporter exporter) {
-        ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ModItems.FOOD_POUCH)
-                .input('S', Items.STRING)
-                .input('L', Items.LEATHER)
-                .input('#', ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
-                .pattern("S ")
-                .pattern("L#")
+        ShapelessRecipeJsonBuilder.create(RecipeCategory.TOOLS, ModItems.FOOD_POUCH)
+                .input(Items.STRING)
+                .input(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
+                .input(Items.LEATHER)
                 .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
                 .offerTo(exporter);
 

@@ -16,32 +16,29 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
+import skyveo.foodpouch.item.FoodPouchMaterial;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
 import skyveo.foodpouch.util.FoodPouchContentsComponentBuilder;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FoodPouchItem extends BundleItem {
-    public static final int DEFAULT_TIER = 1;
-    public static final int BASE_SIZE = 64;
+    public static final int BUNDLE_SIZE = 64;
 
-    public final int maxSize;
+    private final int size;
 
-    public FoodPouchItem(int tier, Item.Settings settings) {
+    public FoodPouchItem(FoodPouchMaterial material, Item.Settings settings) {
         super(settings.maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
-        this.maxSize = getMaxSizeByTier(tier);
+        this.size = material.getSize();
     }
 
-    public FoodPouchItem(int tier) {
-        this(tier, new Item.Settings());
+    public FoodPouchItem(FoodPouchMaterial material) {
+        this(material, new Item.Settings());
     }
 
-    public FoodPouchItem() {
-        this(DEFAULT_TIER);
-    }
-
-    public static int getMaxSizeByTier(int tier) {
-        return tier > 0 ? tier * BASE_SIZE : BASE_SIZE;
+    public int getSize() {
+        return size;
     }
 
     public ItemStack getFirstFood(ItemStack foodPouch) {
@@ -49,7 +46,7 @@ public class FoodPouchItem extends BundleItem {
         return bundleContentsComponent == null || bundleContentsComponent.isEmpty() ? ItemStack.EMPTY : bundleContentsComponent.get(0);
     }
 
-    protected void onContentUpdate(ItemStack foodPouch) {
+    protected void updateFoodPouchContents(ItemStack foodPouch) {
         ItemStack stack = getFirstFood(foodPouch);
         if (stack.isEmpty()) {
             foodPouch.remove(DataComponentTypes.FOOD);
@@ -63,105 +60,105 @@ public class FoodPouchItem extends BundleItem {
             return false;
         }
 
-        FoodPouchContentsComponentBuilder builder = FoodPouchContentsComponentBuilder.of(foodPouch);
-        if (builder == null) {
-            return false;
-        }
+        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(foodPouch);
 
-        BundleItemInvoker invoker = (BundleItemInvoker) this;
-        if (food.isEmpty()) {
-            ItemStack removedItem = builder.removeFirst();
-            if (removedItem == null) {
-                return false;
-            }
+        return optionalBuilder.map(builder -> {
+            BundleItemInvoker invoker = (BundleItemInvoker) this;
 
-            invoker.invokePlayRemoveOneSound(player);
-            if (cursorStackReference != null) {
-                cursorStackReference.set(removedItem);
+            if (food.isEmpty()) {
+                ItemStack removedItem = builder.removeFirst();
+                if (removedItem == null) {
+                    return false;
+                }
+
+                invoker.invokePlayRemoveOneSound(player);
+
+                if (cursorStackReference != null) {
+                    cursorStackReference.set(removedItem);
+                } else {
+                    ItemStack leftovers = slot.insertStack(removedItem);
+                    builder.add(leftovers);
+                }
             } else {
-                ItemStack leftovers = slot.insertStack(removedItem);
-                builder.add(leftovers);
+                if (builder.add(food) == 0) {
+                    return false;
+                }
+                invoker.invokePlayInsertSound(player);
             }
-        } else {
-            if (builder.add(food) == 0) {
-                return false;
-            }
-            invoker.invokePlayInsertSound(player);
-        }
 
-        foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-        this.onContentUpdate(foodPouch);
-        
-        return true;
+            foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+            updateFoodPouchContents(foodPouch);
+
+            return true;
+        }).orElse(false);
     }
 
     @Override
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
-        return this.insertFood(stack, slot.getStack(), slot, clickType, player, null);
+        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
     }
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        return this.insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
+        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        ItemStack food = this.getFirstFood(stack);
+        ItemStack food = getFirstFood(stack);
         return food.getItem().getMaxUseTime(food, user);
     }
 
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        ItemStack food = this.getFirstFood(stack);
+        ItemStack food = getFirstFood(stack);
         return food.getItem().getUseAction(food);
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack foodPouch = user.getStackInHand(hand);
-        return this.getFirstFood(foodPouch).getItem().use(world, user, hand);
+        return getFirstFood(foodPouch).getItem().use(world, user, hand);
     }
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        FoodPouchContentsComponentBuilder builder = FoodPouchContentsComponentBuilder.of(stack);
-        if (builder == null) {
-            return stack;
-        }
+        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
 
-        ItemStack food = builder.removeFirst();
-        if (food == null) {
-            return stack;
-        }
-
-        ItemStack leftovers = food.getItem().finishUsing(food, world, user);
-        int i = builder.add(leftovers);
-        if (i == 0 && user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
-            if (!playerEntity.getInventory().insertStack(leftovers)) {
-                playerEntity.dropItem(leftovers, false);
+        return optionalBuilder.map(builder -> {
+            ItemStack food = builder.removeFirst();
+            if (food == null) {
+                return stack;
             }
-        }
 
-        stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-        this.onContentUpdate(stack);
+            ItemStack leftovers = food.getItem().finishUsing(food, world, user);
+            int i = builder.add(leftovers);
+            if (i == 0 && user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
+                if (!playerEntity.getInventory().insertStack(leftovers)) {
+                    playerEntity.dropItem(leftovers, false);
+                }
+            }
 
-        return stack;
+            stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+            updateFoodPouchContents(stack);
+
+            return stack;
+        }).orElse(stack);
     }
 
     @Override
     public int getItemBarStep(ItemStack stack) {
         BundleContentsComponent bundleContentsComponent = stack.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
-        int i = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), 64);
-        return Math.min(1 + MathHelper.multiplyFraction(Fraction.getFraction(i, this.maxSize), 12), 13);
+        int occupancy = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), BUNDLE_SIZE);
+        return Math.min(1 + MathHelper.multiplyFraction(Fraction.getFraction(occupancy, this.size), ITEM_BAR_STEPS - 1), ITEM_BAR_STEPS);
     }
 
     @Override
     public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
         BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
         if (bundleContentsComponent != null) {
-            int i = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), 64);
-            tooltip.add(Text.translatable("item.minecraft.bundle.fullness", i, this.maxSize).formatted(Formatting.GRAY));
+            int occupancy = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), BUNDLE_SIZE);
+            tooltip.add(Text.translatable("item.minecraft.bundle.fullness", occupancy, this.size).formatted(Formatting.GRAY));
         }
 
     }

@@ -9,60 +9,62 @@ import net.minecraft.item.MilkBucketItem;
 import net.minecraft.item.PotionItem;
 import net.minecraft.screen.slot.Slot;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.Builder {
     public static final List<Class<? extends Item>> ADDITIONAL_ALLOWED_ITEMS = List.of(PotionItem.class, MilkBucketItem.class);
-    public final int maxSize;
+    private final int size;
 
-    public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int maxSize) {
+    public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int size) {
         super(base);
-        this.maxSize = maxSize;
+        this.size = size;
     }
 
-    @Nullable
-    public static FoodPouchContentsComponentBuilder of(ItemStack foodPouch) {
+    public static Optional<FoodPouchContentsComponentBuilder> of(ItemStack foodPouch) {
         BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
         if (bundleContentsComponent == null || !(foodPouch.getItem() instanceof FoodPouchItem foodPouchItem)) {
-            return null;
+            return Optional.empty();
         }
-        return new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.maxSize);
+        return Optional.of(new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.getSize()));
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public static boolean canStoreItem(ItemStack stack) {
         Item item = stack.getItem();
-        if (!item.canBeNested() || item instanceof FoodPouchItem) {
-            return false;
-        }
-        return stack.contains(DataComponentTypes.FOOD) || ADDITIONAL_ALLOWED_ITEMS.contains(item.getClass());
+        return item.canBeNested()
+                && !(item instanceof FoodPouchItem)
+                && (stack.contains(DataComponentTypes.FOOD) || ADDITIONAL_ALLOWED_ITEMS.contains(item.getClass()));
     }
 
     public int getMaxAllowed(ItemStack stack) {
-        Fraction itemValue = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(64));
-        Fraction usedSpace = this.getOccupancy().multiplyBy(Fraction.getFraction(64));
-        Fraction freeSpace = Fraction.getFraction(this.maxSize).subtract(usedSpace);
+        Fraction occupancy = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(FoodPouchItem.BUNDLE_SIZE));
+        Fraction usedSpace = getOccupancy().multiplyBy(Fraction.getFraction(FoodPouchItem.BUNDLE_SIZE));
+        Fraction freeSpace = Fraction.getFraction(getSize()).subtract(usedSpace);
 
-        return Math.max(freeSpace.divideBy(itemValue).intValue(), 0);
+        return Math.max(freeSpace.divideBy(occupancy).intValue(), 0);
     }
 
     @Override
     public int add(ItemStack stack) {
-        if (!FoodPouchContentsComponentBuilder.canStoreItem(stack)) {
+        if (!canStoreItem(stack)) {
             return 0;
         }
 
-        int toAdd = Math.min(stack.getCount(), this.getMaxAllowed(stack));
+        int toAdd = Math.min(stack.getCount(), getMaxAllowed(stack));
         if (toAdd == 0) {
             return 0;
         }
 
         BundleContentsComponentBuilderAccessor accessor = (BundleContentsComponentBuilderAccessor) this;
-        accessor.setOccupancy(this.getOccupancy().add(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(toAdd, 1))));
+        accessor.setOccupancy(getOccupancy().add(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(toAdd, 1))));
 
         int existingStackIndex = accessor.invokeAddInternal(stack);
         if (existingStackIndex != -1) {
@@ -87,7 +89,7 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
     @Override
     public int add(Slot slot, PlayerEntity player) {
         ItemStack itemStack = slot.getStack();
-        int i = this.getMaxAllowed(itemStack);
-        return this.add(slot.takeStackRange(itemStack.getCount(), i, player));
+        int maxToAdd = getMaxAllowed(itemStack);
+        return add(slot.takeStackRange(itemStack.getCount(), maxToAdd, player));
     }
 }

@@ -15,11 +15,11 @@ import skyveo.foodpouch.item.custom.FoodPouchItem;
 import java.util.Map;
 
 public class ModItems {
-    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(), ItemGroups.TOOLS);
-    public static final Item IRON_FOOD_POUCH = register("iron_food_pouch", new FoodPouchItem(2), ItemGroups.TOOLS);
-    public static final Item GOLD_FOOD_POUCH = register("golden_food_pouch", new FoodPouchItem(3), ItemGroups.TOOLS);
-    public static final Item DIAMOND_FOOD_POUCH = register("diamond_food_pouch", new FoodPouchItem(4), ItemGroups.TOOLS);
-    public static final Item NETHERITE_FOOD_POUCH = register("netherite_food_pouch", new FoodPouchItem(5, new Item.Settings().fireproof()), ItemGroups.TOOLS);
+    public static final Item FOOD_POUCH = register("food_pouch", new FoodPouchItem(FoodPouchMaterials.LEATHER), ItemGroups.TOOLS);
+    public static final Item IRON_FOOD_POUCH = register("iron_food_pouch", new FoodPouchItem(FoodPouchMaterials.IRON), ItemGroups.TOOLS);
+    public static final Item GOLD_FOOD_POUCH = register("golden_food_pouch", new FoodPouchItem(FoodPouchMaterials.GOLD), ItemGroups.TOOLS);
+    public static final Item DIAMOND_FOOD_POUCH = register("diamond_food_pouch", new FoodPouchItem(FoodPouchMaterials.DIAMOND), ItemGroups.TOOLS);
+    public static final Item NETHERITE_FOOD_POUCH = register("netherite_food_pouch", new FoodPouchItem(FoodPouchMaterials.NETHERITE, new Item.Settings().fireproof()), ItemGroups.TOOLS);
 
     public static <T extends Item> T register(String name, T item) {
         return register(name, item, null);
