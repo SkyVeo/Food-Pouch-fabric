@@ -15,7 +15,7 @@ public abstract class LivingEntityMixin {
     protected abstract void spawnConsumptionEffects(ItemStack stack, int particleCount);
 
     @Inject(method = "spawnConsumptionEffects", at = @At("HEAD"), cancellable = true)
-    protected void spawnConsumptionEffectsInject(ItemStack stack, int amount, CallbackInfo info) {
+    protected void spawnFoodPouchFirstFoodParticles(ItemStack stack, int amount, CallbackInfo info) {
         if (stack.getItem() instanceof FoodPouchItem foodPouch) {
             this.spawnConsumptionEffects(foodPouch.getFirstFood(stack), amount);
             info.cancel();
