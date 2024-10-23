@@ -52,6 +52,10 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
         return Math.max(freeSpace.divideBy(occupancy).intValue(), 0);
     }
 
+    protected void addOccupancy(Fraction occupancy) {
+        ((BundleContentsComponentBuilderAccessor) this).setOccupancy(getOccupancy().add(occupancy));
+    }
+
     @Override
     public int add(ItemStack stack) {
         if (!canStoreItem(stack)) {
@@ -63,8 +67,9 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
             return 0;
         }
 
+        addOccupancy(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(toAdd, 1)));
+
         BundleContentsComponentBuilderAccessor accessor = (BundleContentsComponentBuilderAccessor) this;
-        accessor.setOccupancy(getOccupancy().add(BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(toAdd, 1))));
 
         int existingStackIndex = accessor.invokeAddInternal(stack);
         if (existingStackIndex != -1) {
