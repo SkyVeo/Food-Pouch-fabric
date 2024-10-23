@@ -5,6 +5,8 @@
 - Store and access food items like a bundle.
 - Right-clicking with the Food Pouch in hand will consume the first available food item stored inside.
 - Compatible with all food, vanilla and modded.
+- Upgrade your Food Pouch to Iron, Gold, Diamond, and Netherite versions, with each tier capable of holding one more stack of food than the previous one.
+- The Food Pouch can be dyed in various colors, just like leather armor, allowing for customization and personalization
 
 ## Download
 The mod can be downloaded on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/food-pouch) and [Modrinth](https://modrinth.com/mod/food-pouch).
