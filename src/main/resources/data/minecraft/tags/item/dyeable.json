@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "foodpouch:food_pouch",
     "foodpouch:iron_food_pouch",

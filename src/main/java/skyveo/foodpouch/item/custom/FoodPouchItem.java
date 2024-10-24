@@ -2,20 +2,25 @@ package skyveo.foodpouch.item.custom;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
+import net.minecraft.component.type.UseRemainderComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
+import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.FoodPouchMaterial;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
 import skyveo.foodpouch.util.FoodPouchContentsComponentBuilder;
@@ -29,12 +34,12 @@ public class FoodPouchItem extends BundleItem {
     private final int size;
 
     public FoodPouchItem(FoodPouchMaterial material, Item.Settings settings) {
-        super(settings.maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT));
+        super(
+                Identifier.ofVanilla("bundle_open_front"),
+                Identifier.ofVanilla("bundle_open_back"),
+                settings.maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT)
+        );
         this.size = material.getSize();
-    }
-
-    public FoodPouchItem(FoodPouchMaterial material) {
-        this(material, new Item.Settings());
     }
 
     public int getSize() {
@@ -46,32 +51,38 @@ public class FoodPouchItem extends BundleItem {
         return bundleContentsComponent == null || bundleContentsComponent.isEmpty() ? ItemStack.EMPTY : bundleContentsComponent.get(0);
     }
 
+    protected void updateFoodPouchContents(ItemStack foodPouch, PlayerEntity player) {
+        ((BundleItemInvoker) this).invokeOnContentChanged(player);
+        updateFoodPouchContents(foodPouch);
+    }
+
     protected void updateFoodPouchContents(ItemStack foodPouch) {
-        ItemStack stack = getFirstFood(foodPouch);
-        if (stack.isEmpty()) {
+        ItemStack food = getFirstFood(foodPouch);
+        if (food.isEmpty()) {
+            foodPouch.remove(DataComponentTypes.CONSUMABLE);
             foodPouch.remove(DataComponentTypes.FOOD);
         } else {
-            foodPouch.set(DataComponentTypes.FOOD, stack.get(DataComponentTypes.FOOD));
+            foodPouch.set(DataComponentTypes.CONSUMABLE, food.get(DataComponentTypes.CONSUMABLE));
+            foodPouch.set(DataComponentTypes.FOOD, food.get(DataComponentTypes.FOOD));
         }
     }
 
     protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
-        if (clickType != ClickType.RIGHT || (cursorStackReference != null && !slot.canTakePartial(player))) {
+        if (clickType != ClickType.LEFT || (cursorStackReference != null && !slot.canTakePartial(player))) {
             return false;
         }
 
         Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(foodPouch);
+        FoodPouch.LOGGER.info("Inserting food: " + optionalBuilder);
 
-        return optionalBuilder.map(builder -> {
-            BundleItemInvoker invoker = (BundleItemInvoker) this;
-
+        optionalBuilder.map(builder -> {
             if (food.isEmpty()) {
-                ItemStack removedItem = builder.removeFirst();
+                ItemStack removedItem = builder.removeSelected();
                 if (removedItem == null) {
                     return false;
                 }
 
-                invoker.invokePlayRemoveOneSound(player);
+                BundleItemInvoker.playRemoveOneSound(player);
 
                 if (cursorStackReference != null) {
                     cursorStackReference.set(removedItem);
@@ -83,24 +94,99 @@ public class FoodPouchItem extends BundleItem {
                 if (builder.add(food) == 0) {
                     return false;
                 }
-                invoker.invokePlayInsertSound(player);
+                BundleItemInvoker.playInsertSound(player);
             }
 
             foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-            updateFoodPouchContents(foodPouch);
+            updateFoodPouchContents(foodPouch, player);
 
             return true;
-        }).orElse(false);
+        });
+        return false;
     }
 
     @Override
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
-        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
+//        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
+
+        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
+
+        return optionalBuilder.map(builder -> {
+            ItemStack food = slot.getStack();
+            if (clickType == ClickType.LEFT && !food.isEmpty()) {
+                if (builder.add(food) > 0) {
+                    BundleItemInvoker.playInsertSound(player);
+                } else {
+                    BundleItemInvoker.playInsertFailSound(player);
+                }
+
+                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+                updateFoodPouchContents(stack, player);
+                return true;
+            }
+            if (clickType == ClickType.RIGHT && food.isEmpty()) {
+                ItemStack removedItem = builder.removeSelected();
+                if (removedItem != null) {
+                    ItemStack itemStack3 = slot.insertStack(removedItem);
+                    if (itemStack3.getCount() > 0) {
+                        builder.add(itemStack3);
+                    } else {
+                        BundleItemInvoker.playRemoveOneSound(player);
+                    }
+                }
+
+                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+                updateFoodPouchContents(stack, player);
+                return true;
+            }
+            return false;
+        }).orElse(false);
+
     }
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
+//        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
+
+        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
+
+        return optionalBuilder.map(builder -> {
+            if (clickType == ClickType.LEFT && otherStack.isEmpty()) {
+               setSelectedStackIndex(stack, -1);
+               return false;
+            }
+            if (clickType == ClickType.LEFT) {
+                if (slot.canTakePartial(player) && builder.add(otherStack) > 0) {
+                    BundleItemInvoker.playInsertSound(player);
+                } else {
+                    BundleItemInvoker.playInsertFailSound(player);
+                }
+
+                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+                updateFoodPouchContents(stack, player);
+                return true;
+            }
+            if (clickType == ClickType.RIGHT && otherStack.isEmpty()) {
+                if (slot.canTakePartial(player)) {
+                    ItemStack itemStack = builder.removeSelected();
+                    if (itemStack != null) {
+                        BundleItemInvoker.playRemoveOneSound(player);
+                        cursorStackReference.set(itemStack);
+                    }
+                }
+
+                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+                updateFoodPouchContents(stack, player);
+                return true;
+            }
+            setSelectedStackIndex(stack, -1);
+            return false;
+        }).orElse(false);
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+
     }
 
     @Override
@@ -116,9 +202,18 @@ public class FoodPouchItem extends BundleItem {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack foodPouch = user.getStackInHand(hand);
         return getFirstFood(foodPouch).getItem().use(world, user, hand);
+    }
+
+    protected void insertStackInInventory(ItemStack stack, LivingEntity player) {
+        if (!(player instanceof PlayerEntity playerEntity) || playerEntity.isInCreativeMode()) {
+            return;
+        }
+        if (!playerEntity.getInventory().insertStack(stack)) {
+            playerEntity.dropItem(stack, false);
+        }
     }
 
     @Override
@@ -126,17 +221,17 @@ public class FoodPouchItem extends BundleItem {
         Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
 
         return optionalBuilder.map(builder -> {
-            ItemStack food = builder.removeFirst();
+            ItemStack food = builder.removeSelected();
             if (food == null) {
                 return stack;
             }
 
-            ItemStack leftovers = food.getItem().finishUsing(food, world, user);
-            int i = builder.add(leftovers);
-            if (i == 0 && user instanceof PlayerEntity playerEntity && !playerEntity.isInCreativeMode()) {
-                if (!playerEntity.getInventory().insertStack(leftovers)) {
-                    playerEntity.dropItem(leftovers, false);
-                }
+            UseRemainderComponent useRemainderComponent = food.get(DataComponentTypes.USE_REMAINDER);
+            if (useRemainderComponent != null) {
+                insertStackInInventory(useRemainderComponent.convertInto().copy(), user);
+            }
+            if (builder.add(food.getItem().finishUsing(food, world, user)) == 0) {
+                insertStackInInventory(food, user);
             }
 
             stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
@@ -153,13 +248,7 @@ public class FoodPouchItem extends BundleItem {
         return Math.min(1 + MathHelper.multiplyFraction(Fraction.getFraction(occupancy, this.size), ITEM_BAR_STEPS - 1), ITEM_BAR_STEPS);
     }
 
-    @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-        BundleContentsComponent bundleContentsComponent = stack.get(DataComponentTypes.BUNDLE_CONTENTS);
-        if (bundleContentsComponent != null) {
-            int occupancy = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), BUNDLE_SIZE);
-            tooltip.add(Text.translatable("item.minecraft.bundle.fullness", occupancy, this.size).formatted(Formatting.GRAY));
-        }
-
+    public int getItemBarColor(ItemStack stack) {
+        return getItemBarStep(stack) == ITEM_BAR_STEPS ? BundleItemInvoker.getFullItemBarColor() : BundleItemInvoker.getItemBarColor();
     }
 }

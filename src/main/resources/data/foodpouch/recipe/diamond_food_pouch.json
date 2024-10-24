@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "minecraft:diamond",
+  "base": "foodpouch:golden_food_pouch",
+  "result": {
+    "count": 1,
+    "id": "foodpouch:diamond_food_pouch"
+  },
+  "template": "minecraft:leather"
+}

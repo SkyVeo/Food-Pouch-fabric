@@ -6,7 +6,8 @@
 		"BundleContentsComponentBuilderAccessor",
 		"BundleContentsComponentInvoker",
 		"BundleItemInvoker",
-		"LivingEntityMixin"
+		"BundleTooltipSubmenuHandlerMixin",
+		"ConsumableComponentMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

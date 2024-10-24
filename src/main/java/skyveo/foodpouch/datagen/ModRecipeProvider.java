@@ -15,35 +15,36 @@ import skyveo.foodpouch.item.ModItems;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeProvider extends FabricRecipeProvider {
-    public ModRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
-        super(output, registriesFuture);
-    }
-
-    protected static void offerFoodPouchUpgradeRecipe(RecipeExporter exporter, Item addition, Item foodPouch, Item result) {
-        SmithingTransformRecipeJsonBuilder.create(
-                Ingredient.ofItems(Items.LEATHER),
-                Ingredient.ofItems(foodPouch),
-                Ingredient.ofItems(addition),
-                RecipeCategory.TOOLS,
-                result
-        )
-                .criterion(hasItem(addition), conditionsFromItem(addition))
-                .offerTo(exporter, getItemPath(result));
-    }
-
-    @Override
-    public void generate(RecipeExporter exporter) {
-        ShapelessRecipeJsonBuilder.create(RecipeCategory.TOOLS, ModItems.FOOD_POUCH)
-                .input(Items.STRING)
-                .input(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
-                .input(Items.LEATHER)
-                .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
-                .offerTo(exporter);
-
-        offerFoodPouchUpgradeRecipe(exporter, Items.IRON_INGOT, ModItems.FOOD_POUCH, ModItems.IRON_FOOD_POUCH);
-        offerFoodPouchUpgradeRecipe(exporter, Items.GOLD_INGOT, ModItems.IRON_FOOD_POUCH, ModItems.GOLD_FOOD_POUCH);
-        offerFoodPouchUpgradeRecipe(exporter, Items.DIAMOND, ModItems.GOLD_FOOD_POUCH, ModItems.DIAMOND_FOOD_POUCH);
-        offerNetheriteUpgradeRecipe(exporter, ModItems.DIAMOND_FOOD_POUCH, RecipeCategory.TOOLS, ModItems.NETHERITE_FOOD_POUCH);
-    }
+@Deprecated
+public class ModRecipeProvider {
+//    public ModRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+//        super(output, registriesFuture);
+//    }
+//
+//    protected static void offerFoodPouchUpgradeRecipe(RecipeExporter exporter, Item addition, Item foodPouch, Item result) {
+//        SmithingTransformRecipeJsonBuilder.create(
+//                Ingredient.ofItems(Items.LEATHER),
+//                Ingredient.ofItems(foodPouch),
+//                Ingredient.ofItems(addition),
+//                RecipeCategory.TOOLS,
+//                result
+//        )
+//                .criterion(hasItem(addition), conditionsFromItem(addition))
+//                .offerTo(exporter, getItemPath(result));
+//    }
+//
+//    @Override
+//    public void generate(RecipeExporter exporter) {
+//        ShapelessRecipeJsonBuilder.create(RecipeCategory.TOOLS, ModItems.FOOD_POUCH)
+//                .input(Items.STRING)
+//                .input(ModItemTags.FOOD_POUCH_CRAFTING_FOOD_INGREDIENTS)
+//                .input(Items.LEATHER)
+//                .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
+//                .offerTo(exporter);
+//
+//        offerFoodPouchUpgradeRecipe(exporter, Items.IRON_INGOT, ModItems.FOOD_POUCH, ModItems.IRON_FOOD_POUCH);
+//        offerFoodPouchUpgradeRecipe(exporter, Items.GOLD_INGOT, ModItems.IRON_FOOD_POUCH, ModItems.GOLD_FOOD_POUCH);
+//        offerFoodPouchUpgradeRecipe(exporter, Items.DIAMOND, ModItems.GOLD_FOOD_POUCH, ModItems.DIAMOND_FOOD_POUCH);
+//        offerNetheriteUpgradeRecipe(exporter, ModItems.DIAMOND_FOOD_POUCH, RecipeCategory.TOOLS, ModItems.NETHERITE_FOOD_POUCH);
+//    }
 }

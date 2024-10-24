@@ -5,15 +5,19 @@ import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.MilkBucketItem;
+import net.minecraft.item.PotionItem;
 import net.minecraft.screen.slot.Slot;
 import org.apache.commons.lang3.math.Fraction;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
 import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
+import java.util.List;
 import java.util.Optional;
 
 public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.Builder {
+    public static final List<Class<? extends Item>> ADDITIONAL_ALLOWED_ITEMS = List.of(PotionItem.class, MilkBucketItem.class);
     private final int size;
 
     public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int size) {
@@ -35,7 +39,9 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
 
     public static boolean canStoreItem(ItemStack stack) {
         Item item = stack.getItem();
-        return item.canBeNested() && !(item instanceof FoodPouchItem) && stack.contains(DataComponentTypes.CONSUMABLE);
+        return item.canBeNested()
+                && !(item instanceof FoodPouchItem)
+                && (stack.contains(DataComponentTypes.FOOD) || ADDITIONAL_ALLOWED_ITEMS.contains(item.getClass()));
     }
 
     public int getMaxAllowed(ItemStack stack) {
@@ -65,7 +71,7 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
 
         BundleContentsComponentBuilderAccessor accessor = (BundleContentsComponentBuilderAccessor) this;
 
-        int existingStackIndex = accessor.invokeGetInsertionIndex(stack);
+        int existingStackIndex = accessor.invokeAddInternal(stack);
         if (existingStackIndex != -1) {
             ItemStack existingStack = accessor.getStacks().remove(existingStackIndex);
             int newCount = existingStack.getCount() + toAdd;
@@ -87,6 +93,8 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
 
     @Override
     public int add(Slot slot, PlayerEntity player) {
-        return add(slot.getStack());
+        ItemStack itemStack = slot.getStack();
+        int maxToAdd = getMaxAllowed(itemStack);
+        return add(slot.takeStackRange(itemStack.getCount(), maxToAdd, player));
     }
 }

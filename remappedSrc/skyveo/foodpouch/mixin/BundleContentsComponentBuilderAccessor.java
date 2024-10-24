@@ -17,6 +17,6 @@ public interface BundleContentsComponentBuilderAccessor {
     @Accessor
     List<ItemStack> getStacks();
 
-    @Invoker("getInsertionIndex")
-    int invokeGetInsertionIndex(ItemStack stack);
+    @Invoker("addInternal")
+    int invokeAddInternal(ItemStack stack);
 }

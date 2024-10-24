@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:string",
+    "#foodpouch:food_pouch_crafting_food_ingredients",
+    "minecraft:leather"
+  ],
+  "result": {
+    "count": 1,
+    "id": "foodpouch:food_pouch"
+  }
+}
