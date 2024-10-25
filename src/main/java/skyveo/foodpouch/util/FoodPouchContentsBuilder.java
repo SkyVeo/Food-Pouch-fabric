@@ -40,11 +40,14 @@ public class FoodPouchContentsBuilder extends BundleContentsComponent.Builder {
     }
 
     public static BundleContentsComponent getTooltipComponent(BundleContentsComponent component, int maxSize) {
-        return BundleContentsComponentInvoker.invokeConstructor(
+        BundleContentsComponent newComponent = BundleContentsComponentInvoker.invokeConstructor(
                 component.stream().toList(),
                 bundleToFoodPouchOccupancy(component.getOccupancy(), maxSize),
                 component.getSelectedStackIndex()
         );
+        ((CustomBundleContentsComponent) (Object) newComponent).setFoodPouchMaxSize(maxSize);
+
+        return newComponent;
     }
 
     public static Fraction bundleToFoodPouchOccupancy(Fraction bundleOccupancy, int maxSize) {

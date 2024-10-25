@@ -5,5 +5,5 @@
   "item.foodpouch.diamond_food_pouch": "Diamond Food Pouch",
   "item.foodpouch.netherite_food_pouch": "Netherite Food Pouch",
 
-  "tag.item.foodpouch.netherite_upgradable_food_pouches": "Netherite Upgradable Food Pouches"
+  "item.food_pouch.empty.description": "Can hold up to %s consumable items"
 }

@@ -5,7 +5,9 @@
 	"mixins": [
 		"BundleContentsComponentBuilderAccessor",
 		"BundleContentsComponentInvoker",
+		"BundleContentsComponentMixin",
 		"BundleItemInvoker",
+		"BundleTooltipComponentMixin",
 		"BundleTooltipSubmenuHandlerMixin",
 		"ConsumableComponentMixin"
 	],

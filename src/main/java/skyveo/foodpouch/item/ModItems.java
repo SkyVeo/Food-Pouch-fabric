@@ -47,6 +47,8 @@ public class ModItems {
     }
 
     public static void load() {
+        // TODO
+
 //        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
 //        waterCauldronBehavior.put(FOOD_POUCH, CauldronBehavior::cleanArmor);
 //        waterCauldronBehavior.put(IRON_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
