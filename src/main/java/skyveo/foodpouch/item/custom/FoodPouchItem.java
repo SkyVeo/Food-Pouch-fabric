@@ -17,8 +17,6 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
-import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.FoodPouchMaterial;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
 import skyveo.foodpouch.util.FoodPouchContentsBuilder;
@@ -62,50 +60,9 @@ public class FoodPouchItem extends BundleItem {
         }
     }
 
-    protected boolean insertFood(ItemStack foodPouch, ItemStack food, Slot slot, ClickType clickType, PlayerEntity player, @Nullable StackReference cursorStackReference) {
-        if (clickType != ClickType.LEFT || (cursorStackReference != null && !slot.canTakePartial(player))) {
-            return false;
-        }
-
-        Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(foodPouch);
-        FoodPouch.LOGGER.info("Inserting food: " + optionalBuilder);
-
-        optionalBuilder.map(builder -> {
-            if (food.isEmpty()) {
-                ItemStack removedItem = builder.removeSelected();
-                if (removedItem == null) {
-                    return false;
-                }
-
-                BundleItemInvoker.playRemoveOneSound(player);
-
-                if (cursorStackReference != null) {
-                    cursorStackReference.set(removedItem);
-                } else {
-                    ItemStack leftovers = slot.insertStack(removedItem);
-                    builder.add(leftovers);
-                }
-            } else {
-                if (builder.add(food) == 0) {
-                    return false;
-                }
-                BundleItemInvoker.playInsertSound(player);
-            }
-
-            foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-            updateFoodPouchContents(foodPouch, player);
-
-            return true;
-        });
-        return false;
-    }
-
     @Override
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
-//        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
-
         Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(stack);
-//        Optional<FoodPouchContentsComponent.Builder> optionalBuilder = FoodPouchContentsComponent.Builder.of(stack);
 
         return optionalBuilder.map(builder -> {
             ItemStack food = slot.getStack();
@@ -116,8 +73,7 @@ public class FoodPouchItem extends BundleItem {
                     BundleItemInvoker.playInsertFailSound(player);
                 }
 
-                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
+                builder.build(stack);
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -132,8 +88,7 @@ public class FoodPouchItem extends BundleItem {
                     }
                 }
 
-                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
+                builder.build(stack);
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -144,10 +99,7 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-//        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
-
         Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(stack);
-//        Optional<FoodPouchContentsComponent.Builder> optionalBuilder = FoodPouchContentsComponent.Builder.of(stack);
 
         return optionalBuilder.map(builder -> {
             if (clickType == ClickType.LEFT && otherStack.isEmpty()) {
@@ -161,8 +113,7 @@ public class FoodPouchItem extends BundleItem {
                     BundleItemInvoker.playInsertFailSound(player);
                 }
 
-                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
+                builder.build(stack);
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -175,8 +126,7 @@ public class FoodPouchItem extends BundleItem {
                     }
                 }
 
-                stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
-//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
+                builder.build(stack);
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -237,7 +187,6 @@ public class FoodPouchItem extends BundleItem {
 
             builder.build(stack);
             updateFoodPouchContents(stack);
-
             return stack;
         }).orElse(stack);
     }

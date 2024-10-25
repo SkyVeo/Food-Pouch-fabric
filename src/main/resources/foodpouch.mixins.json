@@ -9,6 +9,7 @@
 		"BundleItemInvoker",
 		"BundleTooltipComponentMixin",
 		"BundleTooltipSubmenuHandlerMixin",
+		"CauldronBehaviorInvoker",
 		"ConsumableComponentMixin"
 	],
 	"injectors": {

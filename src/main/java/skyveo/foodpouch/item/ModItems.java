@@ -1,6 +1,7 @@
 package skyveo.foodpouch.item;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.block.cauldron.CauldronBehavior;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.Item;
@@ -13,6 +14,9 @@ import net.minecraft.registry.RegistryKeys;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
+import skyveo.foodpouch.mixin.CauldronBehaviorInvoker;
+
+import java.util.Map;
 
 public class ModItems {
     public static final Item FOOD_POUCH = registerFoodPouch("food_pouch", FoodPouchMaterials.LEATHER);
@@ -49,11 +53,11 @@ public class ModItems {
     public static void load() {
         // TODO
 
-//        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
-//        waterCauldronBehavior.put(FOOD_POUCH, CauldronBehavior::cleanArmor);
-//        waterCauldronBehavior.put(IRON_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
-//        waterCauldronBehavior.put(GOLD_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
-//        waterCauldronBehavior.put(DIAMOND_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
-//        waterCauldronBehavior.put(NETHERITE_FOOD_POUCH, CauldronBehavior.CLEAN_DYEABLE_ITEM);
+        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
+        waterCauldronBehavior.put(FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
+        waterCauldronBehavior.put(IRON_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
+        waterCauldronBehavior.put(GOLD_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
+        waterCauldronBehavior.put(DIAMOND_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
+        waterCauldronBehavior.put(NETHERITE_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
     }
 }
