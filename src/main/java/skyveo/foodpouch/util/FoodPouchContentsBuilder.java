@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.math.Fraction;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
 import skyveo.foodpouch.mixin.BundleContentsComponentBuilderAccessor;
@@ -13,35 +14,56 @@ import skyveo.foodpouch.mixin.BundleContentsComponentInvoker;
 
 import java.util.Optional;
 
-public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.Builder {
-    private final int size;
+public class FoodPouchContentsBuilder extends BundleContentsComponent.Builder {
+    private final int maxSize;
 
-    public FoodPouchContentsComponentBuilder(BundleContentsComponent base, int size) {
+    public FoodPouchContentsBuilder(BundleContentsComponent base, int maxSize) {
         super(base);
-        this.size = size;
+        this.maxSize = maxSize;
     }
 
-    public static Optional<FoodPouchContentsComponentBuilder> of(ItemStack foodPouch) {
-        BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
-        if (bundleContentsComponent == null || !(foodPouch.getItem() instanceof FoodPouchItem foodPouchItem)) {
+    public static Optional<FoodPouchContentsBuilder> of(ItemStack foodPouch) {
+        Optional<BundleContentsComponent> optionalComponent = getComponent(foodPouch);
+
+        if (optionalComponent.isEmpty() || !(foodPouch.getItem() instanceof FoodPouchItem foodPouchItem)) {
             return Optional.empty();
         }
-        return Optional.of(new FoodPouchContentsComponentBuilder(bundleContentsComponent, foodPouchItem.getSize()));
+        return Optional.of(new FoodPouchContentsBuilder(optionalComponent.get(), foodPouchItem.getMaxSize()));
     }
 
-    public int getSize() {
-        return size;
+    public static Optional<BundleContentsComponent> getComponent(ItemStack foodPouch) {
+        return Optional.ofNullable(foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS));
     }
 
-    public static boolean canStoreItem(ItemStack stack) {
+    public static BundleContentsComponent getOrDefaultComponent(ItemStack foodPouch) {
+        return foodPouch.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
+    }
+
+    public static BundleContentsComponent getTooltipComponent(BundleContentsComponent component, int maxSize) {
+        return BundleContentsComponentInvoker.invokeConstructor(
+                component.stream().toList(),
+                bundleToFoodPouchOccupancy(component.getOccupancy(), maxSize),
+                component.getSelectedStackIndex()
+        );
+    }
+
+    public static Fraction bundleToFoodPouchOccupancy(Fraction bundleOccupancy, int maxSize) {
+        int itemOccupancy = MathHelper.multiplyFraction(bundleOccupancy, Item.DEFAULT_MAX_COUNT);
+        return Fraction.getFraction(itemOccupancy, maxSize);
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public static boolean canBeAdded(ItemStack stack) {
         Item item = stack.getItem();
         return item.canBeNested() && !(item instanceof FoodPouchItem) && stack.contains(DataComponentTypes.CONSUMABLE);
     }
 
     public int getMaxAllowed(ItemStack stack) {
-        Fraction occupancy = BundleContentsComponentInvoker.getOccupancy(stack).multiplyBy(Fraction.getFraction(FoodPouchItem.BUNDLE_SIZE));
-        Fraction usedSpace = getOccupancy().multiplyBy(Fraction.getFraction(FoodPouchItem.BUNDLE_SIZE));
-        Fraction freeSpace = Fraction.getFraction(getSize()).subtract(usedSpace);
+        Fraction freeSpace = Fraction.ONE.subtract(bundleToFoodPouchOccupancy(getOccupancy(), getMaxSize()));
+        Fraction occupancy = bundleToFoodPouchOccupancy(BundleContentsComponentInvoker.getOccupancy(stack), getMaxSize());
 
         return Math.max(freeSpace.divideBy(occupancy).intValue(), 0);
     }
@@ -52,7 +74,7 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
 
     @Override
     public int add(ItemStack stack) {
-        if (!canStoreItem(stack)) {
+        if (!canBeAdded(stack)) {
             return 0;
         }
 
@@ -88,5 +110,9 @@ public class FoodPouchContentsComponentBuilder extends BundleContentsComponent.B
     @Override
     public int add(Slot slot, PlayerEntity player) {
         return add(slot.getStack());
+    }
+
+    public void build(ItemStack foodPouch) {
+        foodPouch.set(DataComponentTypes.BUNDLE_CONTENTS, build());
     }
 }

@@ -1,7 +1,6 @@
 package skyveo.foodpouch.item;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.block.cauldron.CauldronBehavior;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.Item;
@@ -14,8 +13,6 @@ import net.minecraft.registry.RegistryKeys;
 import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.custom.FoodPouchItem;
-
-import java.util.Map;
 
 public class ModItems {
     public static final Item FOOD_POUCH = registerFoodPouch("food_pouch", FoodPouchMaterials.LEATHER);

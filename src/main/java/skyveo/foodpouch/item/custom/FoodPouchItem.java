@@ -10,12 +10,10 @@ import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.consume.UseAction;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.item.tooltip.BundleTooltipData;
+import net.minecraft.item.tooltip.TooltipData;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
 import net.minecraft.util.*;
-import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.math.Fraction;
@@ -23,32 +21,29 @@ import org.jetbrains.annotations.Nullable;
 import skyveo.foodpouch.FoodPouch;
 import skyveo.foodpouch.item.FoodPouchMaterial;
 import skyveo.foodpouch.mixin.BundleItemInvoker;
-import skyveo.foodpouch.util.FoodPouchContentsComponentBuilder;
+import skyveo.foodpouch.util.FoodPouchContentsBuilder;
 
-import java.util.List;
 import java.util.Optional;
 
 public class FoodPouchItem extends BundleItem {
-    public static final int BUNDLE_SIZE = 64;
-
-    private final int size;
+    private final int maxSize;
 
     public FoodPouchItem(FoodPouchMaterial material, Item.Settings settings) {
         super(
                 Identifier.ofVanilla("bundle_open_front"),
                 Identifier.ofVanilla("bundle_open_back"),
-                settings.maxCount(1).component(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT)
+                settings
         );
-        this.size = material.getSize();
+        this.maxSize = material.getSize();
     }
 
-    public int getSize() {
-        return size;
+    public int getMaxSize() {
+        return this.maxSize;
     }
 
     public ItemStack getFirstFood(ItemStack foodPouch) {
-        BundleContentsComponent bundleContentsComponent = foodPouch.get(DataComponentTypes.BUNDLE_CONTENTS);
-        return bundleContentsComponent == null || bundleContentsComponent.isEmpty() ? ItemStack.EMPTY : bundleContentsComponent.get(0);
+        BundleContentsComponent component = FoodPouchContentsBuilder.getOrDefaultComponent(foodPouch);
+        return component.isEmpty() ? ItemStack.EMPTY : component.get(0);
     }
 
     protected void updateFoodPouchContents(ItemStack foodPouch, PlayerEntity player) {
@@ -72,7 +67,7 @@ public class FoodPouchItem extends BundleItem {
             return false;
         }
 
-        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(foodPouch);
+        Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(foodPouch);
         FoodPouch.LOGGER.info("Inserting food: " + optionalBuilder);
 
         optionalBuilder.map(builder -> {
@@ -109,7 +104,8 @@ public class FoodPouchItem extends BundleItem {
     public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
 //        return insertFood(stack, slot.getStack(), slot, clickType, player, null);
 
-        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
+        Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(stack);
+//        Optional<FoodPouchContentsComponent.Builder> optionalBuilder = FoodPouchContentsComponent.Builder.of(stack);
 
         return optionalBuilder.map(builder -> {
             ItemStack food = slot.getStack();
@@ -121,6 +117,7 @@ public class FoodPouchItem extends BundleItem {
                 }
 
                 stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -136,6 +133,7 @@ public class FoodPouchItem extends BundleItem {
                 }
 
                 stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -148,7 +146,8 @@ public class FoodPouchItem extends BundleItem {
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
 //        return insertFood(stack, otherStack, slot, clickType, player, cursorStackReference);
 
-        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
+        Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(stack);
+//        Optional<FoodPouchContentsComponent.Builder> optionalBuilder = FoodPouchContentsComponent.Builder.of(stack);
 
         return optionalBuilder.map(builder -> {
             if (clickType == ClickType.LEFT && otherStack.isEmpty()) {
@@ -163,6 +162,7 @@ public class FoodPouchItem extends BundleItem {
                 }
 
                 stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -176,6 +176,7 @@ public class FoodPouchItem extends BundleItem {
                 }
 
                 stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+//                stack.set(ModDataComponentTypes.FOOD_POUCH_CONTENTS, builder.build());
                 updateFoodPouchContents(stack, player);
                 return true;
             }
@@ -203,8 +204,8 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        ItemStack foodPouch = user.getStackInHand(hand);
-        return getFirstFood(foodPouch).getItem().use(world, user, hand);
+        ItemStack food = getFirstFood(user.getStackInHand(hand));
+        return food.getItem().use(world, user, hand);
     }
 
     protected void insertStackInInventory(ItemStack stack, LivingEntity player) {
@@ -218,7 +219,7 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        Optional<FoodPouchContentsComponentBuilder> optionalBuilder = FoodPouchContentsComponentBuilder.of(stack);
+        Optional<FoodPouchContentsBuilder> optionalBuilder = FoodPouchContentsBuilder.of(stack);
 
         return optionalBuilder.map(builder -> {
             ItemStack food = builder.removeSelected();
@@ -234,7 +235,7 @@ public class FoodPouchItem extends BundleItem {
                 insertStackInInventory(food, user);
             }
 
-            stack.set(DataComponentTypes.BUNDLE_CONTENTS, builder.build());
+            builder.build(stack);
             updateFoodPouchContents(stack);
 
             return stack;
@@ -243,12 +244,22 @@ public class FoodPouchItem extends BundleItem {
 
     @Override
     public int getItemBarStep(ItemStack stack) {
-        BundleContentsComponent bundleContentsComponent = stack.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
-        int occupancy = MathHelper.multiplyFraction(bundleContentsComponent.getOccupancy(), BUNDLE_SIZE);
-        return Math.min(1 + MathHelper.multiplyFraction(Fraction.getFraction(occupancy, this.size), ITEM_BAR_STEPS - 1), ITEM_BAR_STEPS);
+        BundleContentsComponent bundleContentsComponent = FoodPouchContentsBuilder.getOrDefaultComponent(stack);
+        Fraction occupancy = FoodPouchContentsBuilder.bundleToFoodPouchOccupancy(bundleContentsComponent.getOccupancy(), getMaxSize());
+
+        return Math.min(1 + MathHelper.multiplyFraction(occupancy, ITEM_BAR_STEPS - 1), ITEM_BAR_STEPS);
     }
 
     public int getItemBarColor(ItemStack stack) {
         return getItemBarStep(stack) == ITEM_BAR_STEPS ? BundleItemInvoker.getFullItemBarColor() : BundleItemInvoker.getItemBarColor();
+    }
+
+    @Override
+    public Optional<TooltipData> getTooltipData(ItemStack stack) {
+        if (stack.contains(DataComponentTypes.HIDE_TOOLTIP) || stack.contains(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP)) {
+            return Optional.empty();
+        }
+        return FoodPouchContentsBuilder.getComponent(stack)
+                .map(component -> new BundleTooltipData(FoodPouchContentsBuilder.getTooltipComponent(component, getMaxSize())));
     }
 }
