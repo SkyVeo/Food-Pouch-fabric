@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:diamond_food_pouch"
+        "recipe": "minecraft:diamond_food_pouch_smithing"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:diamond_food_pouch"
+      "minecraft:diamond_food_pouch_smithing"
     ]
   }
 }

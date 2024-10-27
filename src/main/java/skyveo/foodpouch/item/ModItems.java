@@ -47,17 +47,15 @@ public class ModItems {
             settings = settings.fireproof();
         }
 
-        return register(name, new FoodPouchItem(material, settings), ItemGroups.TOOLS);
+        FoodPouchItem foodPouch = register(name, new FoodPouchItem(material, settings), ItemGroups.TOOLS);
+
+        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
+        waterCauldronBehavior.put(foodPouch, CauldronBehaviorInvoker::cleanArmor);
+
+        return foodPouch;
     }
 
     public static void load() {
-        // TODO
 
-        Map<Item, CauldronBehavior> waterCauldronBehavior = CauldronBehavior.WATER_CAULDRON_BEHAVIOR.map();
-        waterCauldronBehavior.put(FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
-        waterCauldronBehavior.put(IRON_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
-        waterCauldronBehavior.put(GOLD_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
-        waterCauldronBehavior.put(DIAMOND_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
-        waterCauldronBehavior.put(NETHERITE_FOOD_POUCH, CauldronBehaviorInvoker::cleanArmor);
     }
 }

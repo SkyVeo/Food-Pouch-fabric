@@ -1,0 +1,11 @@
+// 1.21.2	2024-10-27T18:58:23.8499373	Food Pouch/Food Pouch Mod - Recipes
+c040fd57e9ba414965adf15c704f54b73e7e20a3 data\foodpouch\advancement\recipes\tools\iron_food_pouch_smithing.json
+c6d06a140926ff8e8b62201df0090b8c811fa4dd data\foodpouch\recipe\iron_food_pouch_smithing.json
+5c54ef1109f8b39b799db9975963e6e8f4e42226 data\foodpouch\advancement\recipes\tools\netherite_food_pouch_smithing.json
+f0dd2a6355f622fd613f394feda3465031b8ee56 data\foodpouch\recipe\golden_food_pouch_smithing.json
+6744f7cccc0c6b663229e1b1867fecc8550933ac data\foodpouch\advancement\recipes\tools\diamond_food_pouch_smithing.json
+a1456ced7a45246ec2cde552a37602b6274634e2 data\foodpouch\recipe\diamond_food_pouch_smithing.json
+bed3086a7f5f44bd3e3d98fb25d6bdda52232ebf data\foodpouch\advancement\recipes\tools\food_pouch.json
+84eef1804b0100c9238ca901eedac4d50a21438c data\foodpouch\advancement\recipes\tools\golden_food_pouch_smithing.json
+d2e80c0f71281716c9c19d39ec20dd3c21e4121e data\foodpouch\recipe\food_pouch.json
+061ce07bff40c272f501dc8ac728bc7da7ba2346 data\foodpouch\recipe\netherite_food_pouch_smithing.json
