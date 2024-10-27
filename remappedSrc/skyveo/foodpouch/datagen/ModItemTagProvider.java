@@ -10,6 +10,7 @@ import skyveo.foodpouch.item.ModItems;
 
 import java.util.concurrent.CompletableFuture;
 
+@Deprecated
 public class ModItemTagProvider extends FabricTagProvider.ItemTagProvider {
     public ModItemTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> completableFuture) {
         super(output, completableFuture);
